@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金武江湖</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #58a6ff;
+            --body-text: #c9d1d9;
+            --accent-color: #238636;
+            --highlight: #ffee00;
+            --completed-bg: #010409;
+            --completed-text: #484f58;
+            --moral-color: #79c0ff;
+            --danger-color: #f85149;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--body-text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 0 20px 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* 固定頂部導覽列 */
+        header {
+            width: 100%;
+            background-color: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: var(--body-text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover { background: #30363d; border-color: #8b949e; }
+        .nav-btn.active { background: rgba(88, 166, 255, 0.1); color: var(--text-color); border-color: var(--text-color); }
+
+        /* 分頁控制 */
+        .view-section { display: none; width: 100%; animation: fadeIn 0.4s ease; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 首頁樣式 */
+        .hero { text-align: center; padding: 60px 20px; }
+        .hero h1 { font-size: 3em; color: var(--text-color); margin-bottom: 20px; }
+        .hero p { font-size: 1.1em; color: #8b949e; margin-bottom: 40px; line-height: 1.8; }
+        
+        .start-adventure-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .start-adventure-btn:hover { transform: translateY(-3px); background-color: #2ea043; }
+
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 50px; }
+        .feature-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #30363d; text-align: left; }
+
+        /* 重要：追蹤器固定標頭區塊 */
+        .sticky-tracker-header {
+            position: sticky;
+            top: 60px; /* 緊跟在 nav 之後 */
+            background-color: var(--bg-color);
+            z-index: 1000;
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .dashboard {
+            background: #161b22;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            border: 1px solid #30363d;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .stat-label { font-size: 0.75em; color: #8b949e; margin-bottom: 3px; display: block; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: var(--moral-color); }
+        
+        #search-bar {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background-color: #0d1117;
+            color: white;
+            box-sizing: border-box;
+        }
+        #search-bar:focus { border-color: var(--text-color); outline: none; }
+
+        /* 攻略清單樣式 */
+        .guide-item {
+            background-color: var(--card-bg);
+            margin-bottom: 12px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .guide-item:active { transform: scale(0.98); }
+        .guide-item:hover { border-color: #8b949e; background-color: #1c2128; }
+        .guide-item.completed { opacity: 0.5; background-color: var(--completed-bg); }
+        .guide-item.completed h3, .guide-item.completed p { text-decoration: line-through; color: var(--completed-text); }
+
+        .checkbox-wrapper input { width: 20px; height: 20px; pointer-events: none; accent-color: var(--accent-color); }
+        .content-wrapper h3 { margin: 0 0 8px 0; color: var(--highlight); font-size: 1.1em; }
+        .content-wrapper p { line-height: 1.6; margin: 0; font-size: 0.95em; white-space: pre-line; }
+
+        .clear-btn {
+            background: #21262d;
+            color: #8b949e;
+            border: 1px solid #30363d;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            grid-column: span 2;
+            font-size: 0.8em;
+        }
+        .clear-btn:hover { background: var(--danger-color); color: white; }
+
+        /* Regex 特效顏色 */
+        .kungfu { color: #ffca28; font-weight: bold; text-shadow: 0 0 5px rgba(255, 202, 40, 0.4); }
+        .moral-plus { color: #4caf50; font-weight: bold; }
+        .moral-minus { color: #f85149; font-weight: bold; }
+        .location { color: #00d2ff; font-weight: bold; }
+        #book-count, #home-book-count { color: #ffee00; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-container">
+        <div id="nav-home" class="nav-btn active" onclick="switchView('home')">首頁</div>
+        <div id="nav-tracker" class="nav-btn" onclick="switchView('tracker')">進度追蹤器</div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- 首頁區塊 -->
+    <section id="view-home" class="view-section active">
+        <div class="hero">
+            <h1>金武江湖</h1>
+            <p>歡迎來到金武江湖追蹤器。記錄江湖中的 65 個關鍵轉折，<br>協助大俠收集 14 本天書，成就武林傳奇。</p>
+            <button class="start-adventure-btn" onclick="switchView('tracker')">進入江湖 👣</button>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📖 天書收集</h3>
+                    <p>目前進度：<span id="home-book-count">0 / 14</span></p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚖️ 俠義提醒</h3>
+                    <p>自動標註道德變動。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 追蹤器區塊 -->
+    <section id="view-tracker" class="view-section">
+        <!-- 固定在頂部的區域 -->
+        <div class="sticky-tracker-header">
+            <div class="dashboard">
+                <div class="stat-item">
+                    <span class="stat-label">攻略達成總進度</span>
+                    <span id="progress-text" class="stat-value">0 / 65</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">天書收集進度</span>
+                    <span id="book-count" class="stat-value">0 / 14</span>
+                </div>
+                <button class="clear-btn" onclick="clearProgress()">重置所有江湖進度</button>
+            </div>
+            <input type="text" id="search-bar" placeholder="搜尋地名、武功或天書關鍵字...">
+        </div>
+        
+        <!-- 攻略卡片清單 -->
+        <div id="guide-container"></div>
+    </section>
+</div>
+
+<script>
+    const guideData = [
+        { id: 1, title: "【小俠居】", content: "開箱拿物品；藥壺可以煉藥；床可以休息恢復。" },
+        { id: 2, title: "【霹靂島】", content: "與孔八對話，得霹靂彈x10、《霹靂秘籍》、黃鑰匙；開箱得皮衣、檳榔。" },
+        { id: 3, title: "【叫花子居】", content: "與洪七公對話，到【海邊小屋】找林師父使用材料\n-----材料如下-----\n【靈蛇島】獐腿肉\n【萬鱷島】小牛腰子\n【成昆居】小豬耳朵\n【雲鶴崖】兔肉\n【星宿海】羊羔坐臀\n-----------------\n取得「玉笛誰家聽落梅」後，得《降龍十八掌》。" },
+        { id: 4, title: "【叫花子居】開箱", content: "九花玉露丸x2、銅鑰匙（不扣道德）。\n玉靈散x2 (道德-1)。\n田七鯊膽散x2 (道德-1)。\n天心解毒丹x2、智慧果x2 (道德-1)。" },
+        { id: 5, title: "【冰火島】", content: "與謝遜對話，撿起「一攝金毛」。" },
+        { id: 6, title: "【昆侖山洞】", content: "二層有2個蟠桃。邀張無忌加入，得《九陽神功》，道德+2；一層有硝石、千年冰蠶。" },
+        { id: 7, title: "【武當山】", content: "帶張拜見張三豐，得《倚天屠龍功》，道德值+2。前三次敗得三功，第四次勝得《純陽無極功》。" },
+        { id: 8, title: "【高升客棧】", content: "找到段譽，得《六脈神劍》（道德 > 40）。" },
+        { id: 9, title: "【華山派】", content: "初期練等場所。開箱：藍鑰匙、《紫霞秘籍》、金鑰匙（道德-1）。" },
+        { id: 10, title: "【重陽宮】", content: "找丘處機對戰認輸得《七星劍法》(道德60+)。" },
+        { id: 11, title: "【無量山洞】", content: "點雕像得《北冥神功》、《凌波微步》。擊敗蛤蟆得「莽牯朱蛤」。" },
+        { id: 12, title: "【硝石山洞2】", content: "同意李元芝加入，得《柔雲劍譜》。" },
+        { id: 13, title: "【白駝山】", content: "收歐陽克，道德-5。得通犀地龍丸；開箱得翡翠杯。" },
+        { id: 14, title: "【悅來客棧】", content: "開箱得銀兩x1000，道德-10。" },
+        { id: 15, title: "【蝴蝶谷】", content: "得知王難姑受困，拿走鐵鏟。" },
+        { id: 16, title: "【破廟】", content: "擊敗遊坦之道德+2；收遊坦之得《神足經》道德-2。鏟土得《廣陵散琴曲》。" },
+        { id: 17, title: "【福威鏢局】", content: "告知真相道德+2。收林平之學會《辟邪劍譜》，道德-2。" },
+        { id: 18, title: "【神雕山洞】", content: "打敗毒蛇道德+2。給楊過草道德+4；收楊過加入道德+3。" },
+        { id: 19, title: "【絕情谷】", content: "得斷腸草。開箱拿玉璽、君子劍、淑女劍。" },
+        { id: 20, title: "【百花谷/絕情谷底】", content: "給老頑童玉蜂漿，找到小龍女。" },
+        { id: 21, title: "【古墓】", content: "收小龍女道德+5；邀楊過加入。拿《九陰真經》。" },
+        { id: 22, title: "【沙漠廢墟】", content: "開箱得《白馬嘯西風》、正藍旗。" },
+        { id: 23, title: "【唐詩山洞】", content: "得《唐詩選輯》。天寧寺戰勝得《連城訣》。" },
+        { id: 24, title: "【嚴基居】上", content: "打敗嚴基得二頁刀法。給胡斐道德+2，收胡斐。" },
+        { id: 25, title: "【嚴基居】下", content: "戰勝嚴基得七心海棠，道德+2。" },
+        { id: 26, title: "【藥王莊】", content: "給靈素七心海棠道德+1。收靈素道德+1。" },
+        { id: 27, title: "【金面佛居】", content: "救苗人鳳道德+2。給解藥道德+3。勝得《飛狐外傳》道德+2。" },
+        { id: 28, title: "【雪怪山洞】", content: "戰勝得千年人參、《雪山飛狐》、鑲紅旗。" },
+        { id: 29, title: "【平名醫居】", content: "不殺田伯光邀請平一指，道德-6。" },
+        { id: 30, title: "【無名島】", content: "開啟洞府得《鴛鴦刀》、鑲藍旗。" },
+        { id: 31, title: "【鐵掌山】", content: "得大燕皇帝世系圖表。" },
+        { id: 32, title: "【燕子塢】", content: "收慕容復道德-1。邀王語嫣。" },
+        { id: 33, title: "【勃泥島】", content: "完成袁承志考驗得《碧血劍》，加入道德+5。" },
+        { id: 34, title: "【悅來客棧】", content: "令狐沖美酒任務完成，加入道德+3。" },
+        { id: 35, title: "【華山後洞】", content: "令狐沖學會《獨孤九劍》。拿《五嶽神劍》。" },
+        { id: 36, title: "【萬鱷島】", content: "收岳老二加入得鱷魚皮甲。" },
+        { id: 37, title: "【硝石山洞】續", content: "拿取鑲白旗、智慧果。" },
+        { id: 38, title: "【大輪寺】", content: "戰勝道德+2。收狄雲道德+3得《神照經》。" },
+        { id: 39, title: "【黑龍潭】", content: "解決瑛姑任務得《一陽指》道德+2。" },
+        { id: 40, title: "【桃花島】", content: "找郭靖得《射雕英雄傳》(道德 90+)。" },
+        { id: 41, title: "【有間客棧】", content: "收玄燁，幫回人救人。" },
+        { id: 42, title: "【京城】", content: "救文四哥，開放杭州。" },
+        { id: 43, title: "【回族部落】上", content: "救香香公主。回紅花會開放六和塔，道德+5。" },
+        { id: 44, title: "【回族部落】下", content: "天山戰雪怪，學會「天池神拳」。" },
+        { id: 45, title: "【杭州】", content: "戰勝後得《書劍恩仇錄》。" },
+        { id: 46, title: "【龍門客棧】", content: "收虛竹道德+3。星宿海殺丁春秋道德+10。" },
+        { id: 47, title: "【明教分舵】", content: "地道得《乾坤大挪移》。" },
+        { id: 48, title: "【光明頂】", content: "戰群豪道德+10，得鐵焰令。" },
+        { id: 49, title: "【峨嵋派】", content: "戰勝得倚天劍、道德-10。" },
+        { id: 50, title: "【少林寺】", content: "掃地僧練功房，得《易筋經》。" },
+        { id: 51, title: "【冰火島】續", content: "見謝遜道德+3。殺成昆換屠龍刀。" },
+        { id: 52, title: "【古墓】續", content: "折斷刀劍得《武穆遺書》。" },
+        { id: 53, title: "【光明頂】續", content: "找紫衫龍王回頂，得《倚天屠龍記》。" },
+        { id: 54, title: "【丐幫】", content: "得《天龍八部》。勝慕容復道德+8。" },
+        { id: 55, title: "【蜘蛛洞/凌霄城】", content: "收石破天，道德+1。" },
+        { id: 56, title: "【俠客島】", content: "得《俠客行》、《太玄經》。" },
+        { id: 57, title: "【五派】", content: "戰衡山道德+3。開箱道德-1。" },
+        { id: 58, title: "【嵩山派】", content: "奪魁開箱道德-1。" },
+        { id: 59, title: "【梅莊】", content: "地牢見任我行得《吸星大法》，道德+8。" },
+        { id: 60, title: "【黑木崖】", content: "勝東方道德+4。再戰任我行拿葵花。" },
+        { id: 61, title: "【麗春院】", content: "收韋小寶，台灣拿正黃旗。" },
+        { id: 62, title: "【京城】續", content: "皇宮戰勝拿正白旗。神龍島拿正紅旗。" },
+        { id: 63, title: "【天牢】", content: "殺鰲拜拿鑲黃旗，最後得《鹿鼎記》。" },
+        { id: 64, title: "【金輪寺/五毒教】", content: "掃蕩開箱拿秘籍，道德不重要。" },
+        { id: 65, title: "【小俠居/霹靂島】", content: "拿大會帖，群戰得神杖，霹靂島通關！" }
+    ];
+
+    const bookList = ["飛狐外傳", "雪山飛狐", "連城訣", "天龍八部", "射雕英雄傳", "白馬嘯西風", "鹿鼎記", "笑傲江湖", "書劍恩仇錄", "神雕俠侶", "俠客行", "倚天屠龍記", "碧血劍", "鴛鴦刀"];
+
+    function switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + viewName).classList.add('active');
+        document.getElementById('nav-' + viewName).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function updateDashboard() {
+        let completedCount = 0;
+        let foundBooks = new Set();
+        guideData.forEach(item => {
+            if (localStorage.getItem('jinyong_click_v1_' + item.id) === 'true') {
+                completedCount++;
+                bookList.forEach(book => { if (item.content.includes(`《${book}》`)) foundBooks.add(book); });
+            }
+        });
+        document.getElementById('progress-text').innerText = `${completedCount} / ${guideData.length}`;
+        document.getElementById('book-count').innerText = `${foundBooks.size} / 14`;
+        document.getElementById('home-book-count').innerText = `${foundBooks.size} / 14`;
+    }
+
+    function toggleTask(id) {
+        const key = 'jinyong_click_v1_' + id;
+        const isChecked = localStorage.getItem(key) === 'true';
+        localStorage.setItem(key, !isChecked);
+        const itemDiv = document.getElementById('task-' + id);
+        if (itemDiv) {
+            itemDiv.classList.toggle('completed');
+            itemDiv.querySelector('input').checked = !isChecked;
+        }
+        updateDashboard();
+    }
+
+    function clearProgress() {
+        if (confirm('確定要清空所有江湖進度嗎？')) {
+            guideData.forEach(item => localStorage.removeItem('jinyong_click_v1_' + item.id));
+            renderGuide(guideData);
+        }
+    }
+
+    function renderGuide(data) {
+        const container = document.getElementById('guide-container');
+        container.innerHTML = '';
+        data.forEach(item => {
+            const isCompleted = localStorage.getItem('jinyong_click_v1_' + item.id) === 'true';
+            const highlightedContent = item.content
+                .replace(/《(.*?)》/g, '<span class="kungfu">《$1》</span>')
+                .replace(/【(.*?)】/g, '<span class="location">【$1】</span>')
+                .replace(/道德\+(\d+)/g, '<span class="moral-plus">道德+$1</span>')
+                .replace(/道德\-(\d+)/g, '<span class="moral-minus">道德-$1</span>');
+            const div = document.createElement('div');
+            div.className = `guide-item ${isCompleted ? 'completed' : ''}`;
+            div.id = 'task-' + item.id;
+            div.onclick = () => toggleTask(item.id);
+            div.innerHTML = `<div class="checkbox-wrapper"><input type="checkbox" ${isCompleted ? 'checked' : ''}></div>
+                <div class="content-wrapper"><h3>${item.id}. ${item.title}</h3><p>${highlightedContent}</p></div>`;
+            container.appendChild(div);
+        });
+        updateDashboard();
+    }
+
+    document.getElementById('search-bar').addEventListener('input', (e) => {
+        const keyword = e.target.value.toLowerCase();
+        const filtered = guideData.filter(item => item.title.toLowerCase().includes(keyword) || item.content.toLowerCase().includes(keyword));
+        renderGuide(filtered);
+    });
+
+    renderGuide(guideData);
+</script>
+
+</body>
+</html>
