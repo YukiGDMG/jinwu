@@ -12,6 +12,7 @@
             --body-text: #c9d1d9;
             --accent-color: #238636;
             --highlight: #ffee00;
+            --kungfu-color: #d2a8ff;
             --completed-bg: #010409;
             --completed-text: #484f58;
             --moral-color: #79c0ff;
@@ -35,6 +36,12 @@
             width: 100%;
             padding: 0 20px 40px 20px;
             box-sizing: border-box;
+        }
+
+        header, .sticky-tracker-header {
+            background-color: rgba(13, 17, 23, 0.7) !important; /* 降低背景透明度 */
+            backdrop-filter: blur(12px); /* 增加毛玻璃效果 */
+            -webkit-backdrop-filter: blur(12px);
         }
 
         /* 固定頂部導覽列 */
@@ -148,12 +155,24 @@
             display: flex;
             gap: 15px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
             user-select: none;
         }
         .guide-item:active { transform: scale(0.98); }
         .guide-item:hover { border-color: #8b949e; background-color: #1c2128; }
+        .guide-item:hover:not(.completed) {
+            transform: translateY(-4px); /* 向上浮動 */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); /* 增加陰影層次 */
+            border-color: var(--text-color);
+        }
         .guide-item.completed { opacity: 0.5; background-color: var(--completed-bg); }
+        /* 完成後的卡片稍微壓扁感 */
+        .guide-item.completed {
+            transform: scale(0.99);
+            filter: grayscale(0.5);
+        }
         .guide-item.completed h3, .guide-item.completed p { text-decoration: line-through; color: var(--completed-text); }
 
         .checkbox-wrapper input { width: 20px; height: 20px; pointer-events: none; accent-color: var(--accent-color); }
@@ -173,11 +192,22 @@
         .clear-btn:hover { background: var(--danger-color); color: white; }
 
         /* Regex 特效顏色 */
-        .kungfu { color: #ffca28; font-weight: bold; text-shadow: 0 0 5px rgba(255, 202, 40, 0.4); }
+        .kungfu {
+            color: var(--kungfu-color);
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(210, 168, 255, 0.3); /* 增加金色發光感 */
+            padding: 0 2px;
+        }
         .moral-plus { color: #4caf50; font-weight: bold; }
         .moral-minus { color: #f85149; font-weight: bold; }
-        .location { color: #00d2ff; font-weight: bold; }
+        .location { color: #79c0ff; font-weight: bold; }
         #book-count, #home-book-count { color: #ffee00; }
+
+        @media (max-width: 600px) {
+            .feature-grid { grid-template-columns: 1fr; }
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
     </style>
 </head>
 <body>
