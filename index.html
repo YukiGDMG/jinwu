@@ -173,7 +173,10 @@
         .guide-item.completed { transform: scale(0.99); filter: grayscale(0.5); }
         .guide-item.completed h3, .guide-item.completed p { text-decoration: line-through; color: var(--completed-text); }
 
+        /* 統一的打勾樣式 */
+        .checkbox-wrapper { display: flex; align-items: center; justify-content: center; }
         .checkbox-wrapper input { width: 20px; height: 20px; pointer-events: none; accent-color: var(--accent-color); }
+        
         .content-wrapper h3 { margin: 0 0 8px 0; color: var(--highlight); font-size: 1.1em; }
         .content-wrapper p { line-height: 1.6; margin: 0; font-size: 0.95em; white-space: pre-line; }
 
@@ -217,9 +220,14 @@
         }
         .skills-table tbody tr {
             transition: 0.3s;
+            cursor: pointer; /* 讓整行顯示為可點擊 */
+            user-select: none;
+        }
+        .skills-table tbody tr:active {
+            transform: scale(0.99); /* 點擊時的微縮放效果 */
         }
         .skills-table tbody tr:hover {
-            background-color: rgba(88, 166, 255, 0.1);
+            background-color: #1c2128;
         }
         .skills-table td.skill-name {
             color: var(--kungfu-color);
@@ -230,10 +238,11 @@
         
         /* 裝配與推薦特效 */
         .rank-col { color: var(--moral-color); font-weight: bold; font-size: 1.1em; }
-        .equip-checkbox { width: 18px; height: 18px; accent-color: var(--accent-color); cursor: pointer; }
-        .equipped-row { opacity: 0.4; filter: grayscale(0.8); background-color: var(--completed-bg); }
-        .equipped-row:hover { opacity: 0.7; filter: grayscale(0.4); }
-        .equipped-row td.skill-name { text-decoration: line-through; }
+        
+        .equipped-row { opacity: 0.5; background-color: var(--completed-bg); }
+        .equipped-row { transform: scale(0.99); filter: grayscale(0.5); }
+        .equipped-row:hover { opacity: 0.7; }
+        .equipped-row td.skill-name { text-decoration: line-through; color: var(--completed-text); }
         
         .recommend-badge {
             display: inline-block;
@@ -454,7 +463,6 @@
         skill.rank = index + 1;
     });
 
-
     function switchView(viewName) {
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -551,12 +559,15 @@
             
             const tr = document.createElement('tr');
             if (isEquipped) tr.classList.add('equipped-row');
+            // 修改：讓整行加上 onclick 事件
+            tr.onclick = () => toggleSkillEquip(skill.name);
             
             const recBadge = isRecommended ? `<span class="recommend-badge">🔥 推薦</span>` : '';
 
+            // 修改：套用追蹤器相同的 checkbox-wrapper 結構
             tr.innerHTML = `
                 <td class="rank-col">${skill.rank}</td>
-                <td><input type="checkbox" class="equip-checkbox" ${isEquipped ? 'checked' : ''} onchange="toggleSkillEquip('${skill.name}')"></td>
+                <td><div class="checkbox-wrapper"><input type="checkbox" ${isEquipped ? 'checked' : ''}></div></td>
                 <td class="skill-name">《${skill.name}》${recBadge}</td>
                 <td class="total-col">${skill.totalScore}</td>
                 <td>${formatValue(skill.hp)}</td>
